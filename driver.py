@@ -78,42 +78,82 @@ print("span", span)
 # parameters
 MTOW = 297500 # kg
 Area = 410.8 # m^2 reference area computed in ucrm9_geo.py
-Ma = 0.64 
-CL_factor = 1.21 # reference area / true area in ucrm9_geo.py
+Ma_maneuver = 0.64 
+# CL_factor = 1.21 # reference area / true area in ucrm9_geo.py
 
 # height 0
-T = 288.150
-rho = 1.22500
+T_maneuver = 288.150
+rho_maneuver = 1.22500
 
 gamma = 1.4
 R = 287.058
 
 # calculation
-sos = np.sqrt(gamma*R*T)
-velocity = sos*Ma
-weight = MTOW*9.8
-loadFactor = 2.5
-CL_manuever = loadFactor * weight/(0.5*rho*velocity**2*Area)
+sos_maneuver = np.sqrt(gamma*R*T_maneuver)
+velocity_maneuver = sos_maneuver * Ma_maneuver
+weight = MTOW * 9.8
+loadFactor_maneuver = 2.5
+CL_manuever = loadFactor_maneuver * weight/(0.5 * rho_maneuver * velocity_maneuver**2 * Area)
 
 print('CL_manuever', CL_manuever)
 
 
+# --------------------------------
+# Compute -1 g dive
+# --------------------------------
+
+# parameters
+MTOW = 297500 # kg
+Area = 410.8 # m^2 reference area computed in ucrm9_geo.py
+Ma_dive = 0.64 
+# CL_factor = 1.21 # reference area / true area in ucrm9_geo.py
+
+# height 0
+T_dive = 288.150
+rho_dive = 1.22500
+
+gamma = 1.4
+R = 287.058
+
+# calculation
+sos_dive = np.sqrt(gamma * R * T_dive)
+velocity_dive = sos_dive * Ma_dive
+weight = MTOW * 9.8
+loadFactor_dive = - 1.0
+CL_dive = loadFactor_dive * weight/(0.5 * rho_dive * velocity_dive**2 * Area)
+
+print('CL_dive', CL_dive)
+
+# --------------------------------
+# Cruise with gust
+# --------------------------------
+
+# parameters
+MTOW = 297500 # kg
+Area = 410.8 # m^2 reference area computed in ucrm9_geo.py
+Ma_gust = 0.86
+# CL_factor = 1.21 # reference area / true area in ucrm9_geo.py
+
+# height 0
+T_gust = 234.063
+rho_gust = 0.505700
+
+gamma = 1.4
+R = 287.058
+
+# calculation
+sos_gust = np.sqrt(gamma * R * T_gust)
+velocity_gust = sos_gust * Ma_gust
+weight = MTOW * 9.8
+loadFactor_gust = 1.0
+CL_gust = loadFactor_gust * weight/(0.5 * rho_gust * velocity_gust**2 * Area)
+
+print('CL_gust', CL_gust)
 
 
 # ================================
 #       Aerodynamic analysis
 # ================================
-
-# conduct aerodynamic analysis with avl 
-# under multiple operation conditions
-# NOTICE: THE WING AREAS NOT MATCH!!! (DID NOT INCLUDE THE ROOT PORTION)!!!
-
-# ref
-# https://arc.aiaa.org/doi/pdf/10.2514/6.2014-3274
-# https://arc.aiaa.org/doi/pdfplus/10.2514/1.J056603 (Table 6)
-# https://www.digitaldutch.com/atmoscalc/
-# 1g, at 37000 ft        
-
 # --------------------------------
 # cruise
 # --------------------------------
@@ -135,31 +175,40 @@ for i in range(len(Cl_Ma_pair)):
     Ma_loc = Cl_Ma_pair[i][1]
     Cl_loc = Cl_Ma_pair[i][0]
 
+    # run and save to directory
     node, load = getLoad(Cl_loc, Ma_loc, rho_oper, T_oper, CL_factor = CL_factor)
 
     sum_weight_list.append(np.sum(load)/9.8*2)
+
+
 
 # --------------------------------
 # 2.5 g manuever
 # --------------------------------
 
-Ma = 0.64 
-rho = 1.22500
-T = 288.150
-node, load = getLoad(CL_manuever, Ma, rho, T, CL_factor = CL_factor)
+node_manuever, load_manuever = getLoad(CL_manuever, Ma_maneuver, rho_maneuver, T_maneuver, CL_factor = CL_factor)
 
-# Maximum take-off weight (MTOW) 297 500 kg
-# Maximum landing weight (MLW) 213 180 kg
-# Maximum zero fuel weight (MZFW) 195 040 kg
-# Operational empty weight 138 100 kg
+
+# --------------------------------
+# -1 g manuever
+# --------------------------------
+
+node_dive, load_dive = getLoad(CL_dive, Ma_dive, rho_dive, T_dive, CL_factor = CL_factor)
+
+
+# --------------------------------
+# cruise with gust
+# --------------------------------
+
+node_gust, load_gust = getLoad(CL_gust, Ma_gust, rho_gust, T_gust, CL_factor = CL_factor)
 
 # sanity check
-print(sum_weight_list)
-print(np.sum(load)/9.8*2)
+print("cruise", sum_weight_list)
+print("2.5 g manuever", np.sum(load_manuever)/9.8*2)
+print("-1.0 g maneuver", np.sum(load_dive)/9.8*2)
+print("gust cruise", np.sum(load_gust)/9.8*2)
 
-# THE RESULT IS SMALL!
-#[188421.66188482844, 179142.77207199342, 197679.83922435757, 188356.79997978732, 188324.49259952435]
-
+print("load_manuever", load_manuever)
 
 # ================================
 #        transfer the load
@@ -210,7 +259,7 @@ for i in range(len(Cl_Ma_pair)):
 
         
 # 2.5g
-dir = "OUT_AERO" + "/" + "Cl%.3fMa%.2f" %(CL_manuever, Ma)
+dir = "OUT_AERO" + "/" + "Cl%.3fMa%.2f" %(CL_manuever, Ma_maneuver)
 node = np.loadtxt(dir+'/'+'node.txt')
 load = np.loadtxt(dir+'/'+'load.txt')
 
@@ -222,6 +271,40 @@ for j in range(len(dir_list)):
 
     load_new = getLoad_new(node, load, node_new)
 
-    np.savetxt("./OUT_Struct" + "/" + dir_loc + '/' + "data_forces_Cl%.3fMa%.2f.dat" %(CL_manuever, Ma), load_new)
+    np.savetxt("./OUT_Struct" + "/" + dir_loc + '/' + "data_forces_Cl%.3fMa%.2f.dat" %(CL_manuever, Ma_maneuver), load_new)
+
+    print("np.sum(load_new)", np.sum(load_new))
+
+# -1g
+dir = "OUT_AERO" + "/" + "Cl%.3fMa%.2f" %(CL_dive, Ma_dive)
+node = np.loadtxt(dir+'/'+'node.txt')
+load = np.loadtxt(dir+'/'+'load.txt')
+
+for j in range(len(dir_list)):
+
+    dir_loc = dir_list[j]
+
+    node_new = np.loadtxt(dir_loc + '/' + 'data_nodes.dat')
+
+    load_new = getLoad_new(node, load, node_new)
+
+    np.savetxt("./OUT_Struct" + "/" + dir_loc + '/' + "data_forces_Cl%.3fMa%.2f.dat" %(CL_dive, Ma_dive), load_new)
+
+    print("np.sum(load_new)", np.sum(load_new))
+
+# gust
+dir = "OUT_AERO" + "/" + "Cl%.3fMa%.2f" %(CL_gust, Ma_gust)
+node = np.loadtxt(dir+'/'+'node.txt')
+load = np.loadtxt(dir+'/'+'load.txt')
+
+for j in range(len(dir_list)):
+
+    dir_loc = dir_list[j]
+
+    node_new = np.loadtxt(dir_loc + '/' + 'data_nodes.dat')
+
+    load_new = getLoad_new(node, load, node_new)
+
+    np.savetxt("./OUT_Struct" + "/" + dir_loc + '/' + "data_forces_Cl%.3fMa%.2f.dat" %(CL_gust, Ma_gust), load_new)
 
     print("np.sum(load_new)", np.sum(load_new))
