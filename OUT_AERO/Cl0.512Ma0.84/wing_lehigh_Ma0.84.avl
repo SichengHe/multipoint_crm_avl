@@ -1,0 +1,73 @@
+Wing
+
+0.84 Ma
+1   0    0.0          iYsym  iZsym  Zsym
+
+338.6 1.0  52.846   Sref   Cref   Bref   reference area, chord, span [m]
+
+0.0 0.0  0.0          Xref   Yref   Zref   moment reference location (arb.)
+
+0.0                   CDoref
+
+# area = areaperwing*2
+
+# span doesnt include the root inside the body
+
+#
+
+#==============================================================
+
+#
+
+SURFACE
+
+WING
+
+12  0.0  36  0.0  !  Nchord   Cspace   Nspan  Sspace
+
+
+
+ANGLE
+
+     0.00000    
+
+#
+
+# x,y,z bias for whole surface
+
+# data from https://arc.aiaa.org/doi/pdfplus/10.2514/1.J056603 Fig. 12
+
+# run with CL = 0.5! 
+
+TRANSLATE
+
+0.0 0.0 0.0
+
+#--------------------------------------------------------------
+
+#    Xle         Yle         Zle         chord       angle   
+
+SECTION
+
+# [m]
+
+0.0 0.0 0.0 11.870 4.40
+
+#-----------------------
+
+SECTION
+
+# [m]
+
+5.98503741 8.03316708 0.1917 7.282 0.7917
+
+#-----------------------
+
+SECTION
+
+# [m]
+
+20.04987531 26.55685786 3.186 2.693 -3.9113
+
+#==============================================================
+
