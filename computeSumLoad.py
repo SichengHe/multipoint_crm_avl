@@ -11,4 +11,4 @@ for file_name in force_file_name_list:
 
     force = np.loadtxt(file_name)
 
-    print(np.sum(force[:, -1]) / 9.8 / 1000)
+    print(np.sum(force[:, -1][0:35] + force[:, -1][37:-2]) / 9.8 / 1000)
