@@ -3,7 +3,7 @@ from subprocess import Popen, PIPE
 import numpy as np
 
 
-def getLoad(Cl, Ma, rho, T, CL_factor = 1.0, outdirectory = "./OUT_AERO", indirectory = "./aerodynamic"):
+def getLoad(Cl, Ma, rho, T, CL_factor = 1.0, outdirectory = "./OUT_AERO", indirectory = "./aerodynamic", isGust = False):
     
     # Input:   in CL, Ma
     # Process: mkdir for all combinations of Cl, Ma;
@@ -112,6 +112,10 @@ def getLoad(Cl, Ma, rho, T, CL_factor = 1.0, outdirectory = "./OUT_AERO", indire
                 ind_aft_I += 1
 
     FE = np.asarray(FE)
+
+    # for gust load we scale it up by 1.3
+    if isGust:
+        FE[:, 3] *= 1.3
 
     node = FE[:, 0:3]
     load = FE[:, 3]

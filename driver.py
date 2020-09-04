@@ -134,7 +134,7 @@ Area = 410.8 # m^2 reference area computed in ucrm9_geo.py
 Ma_gust = 0.86
 # CL_factor = 1.21 # reference area / true area in ucrm9_geo.py
 
-# height 0
+# height 27300 ft
 T_gust = 234.063
 rho_gust = 0.505700
 
@@ -200,7 +200,7 @@ node_dive, load_dive = getLoad(CL_dive, Ma_dive, rho_dive, T_dive, CL_factor = C
 # cruise with gust
 # --------------------------------
 
-node_gust, load_gust = getLoad(CL_gust, Ma_gust, rho_gust, T_gust, CL_factor = CL_factor)
+node_gust, load_gust = getLoad(CL_gust, Ma_gust, rho_gust, T_gust, CL_factor = CL_factor, isGust = True)
 
 # sanity check
 print("cruise", sum_weight_list)
